@@ -4,10 +4,14 @@ class php (
 ) {
     Class["memcache"] -> Class["php"]
 
+    # Prepare filesystem
+
     exec { "php_dirs":
         command => "mkdir -p ${path} ${path}/src ${path}/log ${path}/run ${path}/lib ${path}/etc ${path}/conf.d ${path}/pool.d",
         creates => $path
     }
+
+    # Download and install PHP
 
     exec { "php_download":
         command => "wget http://www.php.net/get/php-${version}.tar.gz/from/this/mirror -O php-${version}.tar.gz",
@@ -81,6 +85,8 @@ class php (
         ]
     }
 
+    # PECL modules
+
     php::pecl { "memcache":
         package => "http://pecl.php.net/get/memcache-3.0.8.tgz",
         phpInstallPath => $path,
@@ -92,6 +98,28 @@ class php (
         phpInstallPath => $path,
         require => Exec["php_env_path"]
     }
+
+    # Install xdebug
+
+    php::pecl { "xdebug":
+        package => "http://pecl.php.net/get/xdebug-2.2.3.tgz",
+        phpInstallPath => $path,
+        require => Exec["php_env_path"]
+    }
+
+    file { "${path}/conf.d/xdebug.ini":
+        content => template("php/xdebug.ini.erb"),
+        ensure => file,
+        require => Php::Pecl["xdebug"],
+        notify => Service["php-fpm"]
+    }
+
+    file { "/var/www/xdebug_profiles":
+        ensure => directory,
+        require => Php::Pecl["xdebug"]
+    }
+
+    # Install xhprof
 
     php::pecl { "xhprof":
         package => "http://pecl.php.net/get/xhprof-0.9.4.tgz",
@@ -113,7 +141,10 @@ class php (
     file { "/usr/local/php/conf.d/xhprof.ini":
         content => template("php/xhprof.ini.erb"),
         ensure => file,
-        require => Exec["xhprof_ui"],
+        require => [
+            Exec["xhprof_ui"],
+            Exec["php_dirs"]
+        ],
         notify => Service["php-fpm"]
     }
 }

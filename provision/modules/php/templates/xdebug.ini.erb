@@ -1,0 +1,18 @@
+[xdebug]
+<% extDir = `/usr/local/php/bin/php-config --extension-dir` %>
+; register extension
+zend_extension="<%= "#{extDir.chomp}" %>/xdebug.so"
+
+; general
+xdebug.coverage_enable = 1
+xdebug.default_enable = 1
+
+; profiling
+xdebug.profiler_enable = 0
+xdebug.profiler_enable_trigger = 1
+xdebug.profiler_output_dir = /var/www/xdebug_profiles
+
+; remote debugging
+xdebug.remote_enable = 1
+xdebug.remote_host = localhost
+xdebug.remote_port = 9000
