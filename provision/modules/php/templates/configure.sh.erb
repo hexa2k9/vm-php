@@ -1,0 +1,23 @@
+sudo sh ./configure \
+--prefix=/usr/local/php \
+--with-config-file-scan-dir=/usr/local/php/conf.d \
+--with-bz2 \
+--with-curl \
+--with-pear=/usr/local/pear \
+--enable-soap \
+--with-openssl \
+--with-mcrypt \
+--with-mysql \
+--with-pdo-mysql \
+--enable-fpm \
+--with-fpm-user=vagrant \
+--with-fpm-group=vagrant \
+--with-gd \
+--with-zlib \
+--with-jpeg-dir=/usr \
+--with-png-dir=/usr \
+--with-freetype-dir=/usr \
+--enable-gd-native-ttf \
+--enable-exif \
+--enable-intl \
+--enable-mbstring && make && sudo make install

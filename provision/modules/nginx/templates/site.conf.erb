@@ -1,0 +1,81 @@
+server {
+    # we want to listen on port 80 on all IPs on our system - both IPv4 and IPv6
+    listen [::]:8080;
+
+    # our primary server name is the first, aliases simply come after it. you can also include wildcards like *.example.com
+    server_name <%= scope.lookupvar('nginx::params::domain') %>;
+
+    # where are our site files stored?
+    root /var/www/public;
+
+    # define our access and error logs for this vhost
+    access_log /var/www/logs/access.log;
+    error_log /var/www/logs/error.log;
+
+    # very important, php won't work without this - it sets a bunch of the server
+    # values that it expects
+    include fastcgi_params;
+
+    # we are very simple - any requests that don't match one of the later location blocks we
+    # define will be matched by this one
+    location / {
+        # the magic. this is the equivalent of all those lines you use for mod_rewrite in Apache
+        # if the request is for "/foo", we'll first try it as a file. then as a directory. and finally
+        # we'll assume its some sort of "clean" url and hand it to index.php so our CMS can work with it
+        try_files $uri $uri/ /index.php$is_args$args;
+
+        # $is_args will be '?' if there is a GET string, or '' if there isn't
+        # $args is obviously then the GET string, or '' if there isn't one
+    }
+
+    # remember that PHP-FPM status URL we setup? we want to support it for this
+    # vhost. so if the request is for /status, hand that back to
+    # PHP using our named upstream server
+    location /status {
+        fastcgi_pass php;
+    }
+
+    # this is identical, but for the ping URL we setup
+    location /ping {
+        fastcgi_pass php;
+    }
+
+    # and finally, the magic that makes PHP work. if the file being requested ends in ".php"
+    # it's something that PHP-FPM should process, so hand it to our named upstream server
+    location ~ \.php$ {
+        fastcgi_pass php;
+    }
+}
+
+server {
+    # we want to listen on port 80 on all IPs on our system - both IPv4 and IPv6
+    listen [::]:8081;
+
+    # our primary server name is the first, aliases simply come after it. you can also include wildcards like *.example.com
+    server_name <%= scope.lookupvar('nginx::params::domain') %>;
+
+    # where are our site files stored?
+    root /var/www/xhprof/xhprof_html;
+
+    # very important, php won't work without this - it sets a bunch of the server
+    # values that it expects
+    include fastcgi_params;
+
+    # we are very simple - any requests that don't match one of the later location blocks we
+    # define will be matched by this one
+    location / {
+        # the magic. this is the equivalent of all those lines you use for mod_rewrite in Apache
+        # if the request is for "/foo", we'll first try it as a file. then as a directory. and finally
+        # we'll assume its some sort of "clean" url and hand it to index.php so our CMS can work with it
+        try_files $uri $uri/ /index.php$is_args$args;
+
+        # $is_args will be '?' if there is a GET string, or '' if there isn't
+        # $args is obviously then the GET string, or '' if there isn't one
+    }
+
+    # and finally, the magic that makes PHP work. if the file being requested ends in ".php"
+    # it's something that PHP-FPM should process, so hand it to our named upstream server
+    location ~ \.php$ {
+        fastcgi_pass php;
+    }
+}
