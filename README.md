@@ -56,8 +56,10 @@ pull request for each branch. This allows us to review and pull in new features 
 
 ## Requirements
 
-You'll need the following software installed on your local machine:
+You'll need to meet these OS and software requirements to use these Puppet scripts. Sorry, this
+won't run on Windows hosts.
 
+* UNIX or Linux OS
 * VirtualBox
 * Vagrant
 * Terminal/Console
