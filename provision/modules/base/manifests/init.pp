@@ -3,16 +3,31 @@ class base {
         command => "sudo apt-get update"
     }
 
-    package { "base-packages":
+    package { "essential-packages":
         name => [
-            "git",
-            "strace",
+            "sudo",
+            "aptitude",
+            "build-essential",
             "wget",
             "unzip",
-            "build-essential",
-            "libmcrypt-dev"
+            "git",
+            "strace",
+            "libmcrypt-dev",
+            "python-software-properties"
         ],
-        ensure => present,
+        ensure => installed,
         require => Exec["apt-update"]
+    }
+
+    exec { "ppa-ondrej-php5":
+        command => "sudo add-apt-repository ppa:ondrej/php5",
+        creates => "/etc/apt/sources.list.d/ondrej-php5-precise.list",
+        require => Package["essential-packages"]
+    }
+
+    exec { "apt-update-again":
+        command => "sudo apt-get update",
+        require => Exec["ppa-ondrej-php5"],
+        unless => "test -f /usr/bin/php"
     }
 }

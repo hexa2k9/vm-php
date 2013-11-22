@@ -19,8 +19,8 @@
 ; Unix user/group of processes
 ; Note: The user is mandatory. If the group is not set, the default user's group
 ;       will be used.
-user = vagrant
-group = vagrant
+user = www-data
+group = www-data
 
 ; The address on which to accept FastCGI requests.
 ; Valid syntaxes are:
@@ -30,11 +30,11 @@ group = vagrant
 ;                            specific port;
 ;   '/path/to/unix/socket' - to listen on a unix socket.
 ; Note: This value is mandatory.
-listen = /usr/local/php/run/php-fpm.socket
+listen = /var/run/php5-fpm.sock
 
-; Set listen(2) backlog. A value of '-1' means unlimited.
-; Default Value: 128 (-1 on FreeBSD and OpenBSD)
-;listen.backlog = -1
+; Set listen(2) backlog.
+; Default Value: 65535 (-1 on FreeBSD and OpenBSD)
+;listen.backlog = 65535
 
 ; Set permissions for unix socket, if one is used. In Linux, read/write
 ; permissions must be set in order to allow connections from a web server. Many
@@ -51,7 +51,15 @@ listen = /usr/local/php/run/php-fpm.socket
 ; must be separated by a comma. If this value is left blank, connections will be
 ; accepted from any ip address.
 ; Default Value: any
-;listen.allowed_clients = 127.0.0.1
+listen.allowed_clients = 127.0.0.1
+
+; Specify the nice(2) priority to apply to the pool processes (only if set)
+; The value can vary from -19 (highest priority) to 20 (lower priority)
+; Note: - It will only work if the FPM master process is launched as root
+;       - The pool processes will inherit the master process priority
+;         unless it specified otherwise
+; Default Value: no set
+; priority = -19
 
 ; Choose how the process manager will control the number of child processes.
 ; Possible Values:
@@ -267,7 +275,7 @@ ping.path = /ping
 ;      - %{megabytes}M
 ;      - %{mega}M
 ;  %n: pool name
-;  %o: ouput header
+;  %o: output header
 ;      it must be associated with embraces to specify the name of the header:
 ;      - %{Content-Type}o
 ;      - %{X-Powered-By}o
@@ -289,7 +297,7 @@ ping.path = /ping
 ;  %u: remote user
 ;
 ; Default: "%R - %u %t \"%m %r\" %s"
-;access.format = %R - %u %t "%m %r%Q%q" %s %f %{mili}d %{kilo}M %C%%
+;access.format = "%R - %u %t \"%m %r%Q%q\" %s %f %{mili}d %{kilo}M %C%%"
 
 ; The log file for slow requests
 ; Default Value: not set

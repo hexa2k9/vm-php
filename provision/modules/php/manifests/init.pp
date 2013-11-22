@@ -1,150 +1,117 @@
-class php (
-    $version = "5.5.6",
-    $path = "/usr/local/php"
-) {
+class php {
     Class["memcache"] -> Class["php"]
 
-    # Prepare filesystem
+    include nginx::params
+    include mysql::params
 
-    exec { "php_dirs":
-        command => "mkdir -p ${path} ${path}/src ${path}/log ${path}/run ${path}/lib ${path}/etc ${path}/conf.d ${path}/pool.d",
-        creates => $path
+    # Install PHP
+
+    package { "php":
+        name => [
+            "php-pear",
+            "php5-cgi",
+            "php5-cli",
+            "php5-common",
+            "php5-curl",
+            "php5-dbg",
+            "php5-dev",
+            "php5-fpm",
+            "php5-gd",
+            "php5-intl",
+            "php5-json",
+            "php5-mcrypt",
+            "php5-memcached",
+            "php5-mysqlnd",
+            "php5-sqlite",
+            "php5-tidy",
+            "php5-xdebug"
+        ],
+        ensure => installed
     }
 
-    # Download and install PHP
+    # Configure PHP
 
-    exec { "php_download":
-        command => "wget http://www.php.net/get/php-${version}.tar.gz/from/this/mirror -O php-${version}.tar.gz",
-        cwd => "${path}/src",
-        creates => "${path}/src/php-${version}.tar.gz",
-        require => Exec["php_dirs"]
-    }
-
-    exec { "php_extract":
-        command => "tar -xzvf php-${version}.tar.gz",
-        cwd => "${path}/src",
-        creates => "${path}/src/php-${version}/configure",
-        require => Exec["php_download"]
-    }
-
-    file { "${path}/lib/php.ini":
-        ensure => file,
-        content => template("php/php.ini.erb"),
-        require => Exec["php_extract"]
-    }
-
-    file { "${path}/etc/php-fpm.conf":
+    file { "/etc/php5/fpm/php-fpm.conf":
         ensure => file,
         content => template("php/php-fpm.conf.erb"),
-        require => Exec["php_extract"]
+        require => Package["php"]
     }
 
-    file { "${path}/pool.d/www.conf":
+    file { "/etc/php5/fpm/php.ini":
+        ensure => file,
+        content => template("php/php.ini.erb"),
+        require => Package["php"]
+    }
+
+    file { "/etc/php5/fpm/pool.d/www.conf":
         ensure => file,
         content => template("php/www.conf.erb"),
-        require => File["${path}/etc/php-fpm.conf"]
+        require => Package["php"]
     }
 
-    exec { "php_dependencies":
-        command => "sudo aptitude build-dep php5 -y",
-        unless => "test -f ${path}/bin/php",
-        timeout => 0,
-        require => Exec["php_extract"]
-    }
+    # Run PHP
 
-    exec { "php_make":
-        command => template("php/configure.sh.erb"),
-        timeout => 0,
-        cwd => "${path}/src/php-${version}",
-        creates => "${path}/bin/php",
-        require => Exec["php_dependencies"]
-    }
-
-    exec { "php_dir_permissions":
-        command => "chown -R vagrant:vagrant ${path}",
-        require => Exec["php_make"]
-    }
-
-    exec { "php_initd":
-        command => "cp -f /vagrant/provision/modules/php/files/php-fpm.init.d /etc/init.d/php-fpm && chmod 755 /etc/init.d/php-fpm && update-rc.d -f php-fpm defaults",
-        creates => "/etc/init.d/php-fpm",
-        require => Exec["php_dir_permissions"]
-    }
-
-    exec { "php_env_path":
-        command => "echo \"PATH=/usr/local/php/bin:\\\$PATH\" >> /home/vagrant/.profile",
-        require => Exec["php_initd"]
-    }
-
-    service { "php-fpm":
+    service { "php5-fpm":
         ensure => running,
+        hasrestart => true,
+        require => Package["php"],
         subscribe => [
-            File["${path}/lib/php.ini"],
-            File["${path}/etc/php-fpm.conf"],
-            File["${path}/pool.d/www.conf"]
+            File["/etc/php5/fpm/php-fpm.conf"],
+            File["/etc/php5/fpm/php.ini"],
+            File["/etc/php5/fpm/pool.d/www.conf"]
         ]
     }
 
-    # PECL modules
+    # Configure xdebug
 
-    php::pecl { "memcache":
-        package => "http://pecl.php.net/get/memcache-3.0.8.tgz",
-        phpInstallPath => $path,
-        require => Exec["php_env_path"]
-    }
-
-    php::pecl { "uuid":
-        package => "http://pecl.php.net/get/uuid-1.0.3.tgz",
-        phpInstallPath => $path,
-        require => Exec["php_env_path"]
-    }
-
-    # Install xdebug
-
-    php::pecl { "xdebug":
-        package => "http://pecl.php.net/get/xdebug-2.2.3.tgz",
-        phpInstallPath => $path,
-        require => Exec["php_env_path"]
-    }
-
-    file { "${path}/conf.d/xdebug.ini":
-        content => template("php/xdebug.ini.erb"),
-        ensure => file,
-        require => Php::Pecl["xdebug"],
-        notify => Service["php-fpm"]
-    }
-
-    file { "/var/www/xdebug_profiles":
+    file { "/var/www/xdebug":
         ensure => directory,
-        require => Php::Pecl["xdebug"]
+        require => Package["php"]
+    }
+
+    file { "/etc/php5/fpm/conf.d/xdebug-custom.ini":
+        ensure => file,
+        content => template("php/xdebug.ini"),
+        require => Package["php"],
+        notify => Service["php5-fpm"]
     }
 
     # Install xhprof
 
-    php::pecl { "xhprof":
-        package => "http://pecl.php.net/get/xhprof-0.9.4.tgz",
-        phpInstallPath => $path,
-        require => Exec["php_env_path"]
+    exec { "php-xhprof":
+        command => "sudo pecl install http://pecl.php.net/get/xhprof-0.9.4.tgz",
+        unless => "test -f `php-config --extension-dir`/xhprof.so"
     }
 
-    exec { "xhprof_ui":
+    file { "/etc/php5/fpm/conf.d/xhprof.ini":
+        ensure => file,
+        content => template("php/xhprof.ini.erb"),
+        require => Exec["php-xhprof"],
+        notify => Service["php5-fpm"]
+    }
+
+    # Install xhprof ui
+
+    exec { "php-xhprof-ui":
         command => "git clone git://github.com/preinheimer/xhprof.git",
         cwd => "/var/www",
         creates => "/var/www/xhprof"
     }
 
-    file { "/var/www/xhprof/runs":
-        ensure => directory,
-        require => Exec["xhprof_ui"]
+    file { "/var/www/xhprof/xhprof_lib/config.php":
+        ensure => file,
+        content => template("php/xhprof.config.php.erb"),
+        require => Exec["php-xhprof-ui"]
     }
 
-    file { "/usr/local/php/conf.d/xhprof.ini":
-        content => template("php/xhprof.ini.erb"),
-        ensure => file,
-        require => [
-            Exec["xhprof_ui"],
-            Exec["php_dirs"]
-        ],
-        notify => Service["php-fpm"]
+    exec { "xhprof-database":
+        command => "echo \"CREATE DATABASE xhprof; GRANT ALL ON xhprof.* TO '${mysql::params::user}'@'localhost'; USE xhprof; SOURCE /var/www/provision/modules/php/templates/xhprof.sql;\" | mysql -u root -p${mysql::params::rootPassword}",
+        require => Exec["php-xhprof-ui"],
+        unless => "mysql -u ${mysql::params::user} -p${mysql::params::password} xhprof"
+    }
+
+    file { "/var/www/xhprof/runs":
+        ensure => directory,
+        require => Exec["php-xhprof-ui"]
     }
 }

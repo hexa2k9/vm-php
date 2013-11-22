@@ -1,5 +1,5 @@
 upstream php {
-    server unix:/usr/local/php/run/php-fpm.socket;
+    server unix:/var/run/php5-fpm.sock;
 }
 
 # make sure index.php is first in all our vhosts

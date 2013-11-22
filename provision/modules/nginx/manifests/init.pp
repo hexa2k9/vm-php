@@ -19,8 +19,14 @@ class nginx {
         require => Package["nginx"]
     }
 
+    file { "/var/www/logs":
+        ensure => directory
+    }
+
     service { "nginx":
         ensure => running,
+        hasrestart => true,
+        require => File["/var/www/logs"],
         subscribe => [
             File["/etc/nginx/conf.d/php5-fpm.conf"],
             File["/etc/nginx/sites-enabled/${nginx::params::domain}"]

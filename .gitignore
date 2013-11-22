@@ -1,14 +1,5 @@
-# generic
 .DS_Store
-
-# vagrant
 .vagrant
-
-# nginx logs
-logs/*
-!logs/README.md
-
-# extensions
+logs
 xhprof
-xdebug_profiles
-
+xdebug
