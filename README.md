@@ -53,6 +53,7 @@ I include the xdebug extension. This extension will send remote debugging inform
 * bcmath
 * bz2
 * calendar
+* cgi-fcgi
 * Core
 * ctype
 * curl
@@ -79,7 +80,6 @@ I include the xdebug extension. This extension will send remote debugging inform
 * mysqli
 * mysqlnd
 * openssl
-* pcntl
 * pcre
 * PDO
 * pdo_mysql
@@ -103,6 +103,7 @@ I include the xdebug extension. This extension will send remote debugging inform
 * tokenizer
 * wddx
 * xdebug
+* xhprof
 * xml
 * xmlreader
 * xmlwriter
