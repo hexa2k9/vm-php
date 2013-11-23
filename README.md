@@ -6,6 +6,19 @@ The purpose of these [Puppet][puppet] scripts is to create a development environ
 In the future, I hope to abstract these Puppet scripts into a more modular form. For now, they suit
 my own immediate needs.
 
+## Getting Started
+
+1. Clone this repository to your computer
+2. Specify your MySQL database settings in `provision/modules/mysql/manifests/params.pp`
+3. Specify your nginx website domain in `provision/modules/nginx/manifests/params.pp`
+4. Run `vagrant up`
+
+When your virtual machine is ready:
+
+* Access your website on host or guest port `8080`
+* Access the xhprof UI on host or guest port `8081`
+* Listen for remote xdebug communication on host port `9000`
+
 ## Software
 
 * nginx
@@ -34,16 +47,7 @@ VirtualBox). Profiling with the xhprof UI is available on guest port 8081.
 * xdebug
 * xhprof
 
-## Getting Started
 
-1. Clone this repository to your computer
-2. Specify your MySQL database settings in `provision/modules/mysql/manifests/params.pp`
-3. Specify your nginx website domain in `provision/modules/nginx/manifests/params.pp`
-4. Run `vagrant up`
-
-After the virtual machine is running, update `/etc/hosts` to point your website's
-domain name to `192.168.33.10`. You can access the development website on port `8080` and
-the xhprof UI on port `8081`.
 
 ## How to Contribute
 
