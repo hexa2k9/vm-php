@@ -16,8 +16,8 @@ my own immediate needs.
 When your virtual machine is ready:
 
 * Point your website domain to `192.168.33.10` in `/etc/hosts`
-* Access your website on host or guest port `8080`
-* Access the xhprof UI on host or guest port `8081`
+* Access your website on guest port `8080`
+* Access the xhprof UI on guest port `8081`
 * Listen for remote xdebug communication on host port `9000`
 
 ## System Requirements
