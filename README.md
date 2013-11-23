@@ -20,6 +20,8 @@ When your virtual machine is ready:
 * Access the xhprof UI on guest port `8081`
 * Listen for remote xdebug communication on host port `9000`
 
+Your website's public document root is the `public/` directory.
+
 ## System Requirements
 
 * UNIX or Linux OS
