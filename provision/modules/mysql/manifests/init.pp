@@ -7,15 +7,26 @@ class mysql {
         ensure => present
     }
 
-    file { "/etc/my.cnf":
+    file { "/etc/mysql/my.cnf":
         ensure => file,
         content => template("mysql/my.cnf.erb"),
         require => Package["mysql-server"]
     }
 
+    # Remove default log files so we can use custom log file size
+
+    exec { "mysql-remove-default-logs":
+        command => "rm /var/lib/mysql/ib_logfile*",
+        require => Package["mysql-server"],
+        unless => "mysql -u root -p${mysql::params::rootPassword}"
+    }
+
+    # Start server
+
     service { "mysql":
         ensure => running,
-        subscribe => File["/etc/my.cnf"]
+        require => Exec["mysql-remove-default-logs"],
+        subscribe => File["/etc/mysql/my.cnf"]
     }
 
     exec { "mysql_root_password":
