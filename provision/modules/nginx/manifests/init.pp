@@ -19,6 +19,18 @@ class nginx {
         require => Package["nginx"]
     }
 
+    file { "/etc/nginx/nginx.conf":
+        ensure => file,
+        content => template("nginx/nginx.conf.erb"),
+        require => Package["nginx"]
+    }
+
+    file { "/etc/nginx/mime.types":
+        ensure => file,
+        content => template("nginx/mime.types.erb"),
+        require => Package["nginx"]
+    }
+
     file { "/var/www/logs":
         ensure => directory
     }
