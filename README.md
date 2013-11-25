@@ -18,6 +18,7 @@ When your virtual machine is ready:
 * Point your website domain to `192.168.33.10` in `/etc/hosts`
 * Access your website on guest port `8080`
 * Access the xhprof UI on guest port `8081`
+* Access MySQL on host port `8306`
 * Listen for remote xdebug communication on host port `9000`
 
 Your website's public document root is the `public/` directory.
@@ -45,7 +46,7 @@ I use the Ondřej Surý custom PPA to install PHP and related extensions. This a
 
 #### xhprof
 
-I include the xhprof extension and xhprof GUI. The GUI is available on host or guest port `8081`.
+I include the xhprof extension and xhprof GUI. The GUI is available on guest port `8081`.
 
 #### xdebug
 
