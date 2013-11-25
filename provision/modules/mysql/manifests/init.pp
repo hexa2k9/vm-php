@@ -36,13 +36,13 @@ class mysql {
     }
 
     exec { "mysql_user":
-        command => "echo \"CREATE USER '${mysql::params::user}'@'localhost' IDENTIFIED BY '${mysql::params::password}';\" | mysql -u root -p${mysql::params::rootPassword}",
+        command => "echo \"CREATE USER '${mysql::params::user}'@'%' IDENTIFIED BY '${mysql::params::password}';\" | mysql -u root -p${mysql::params::rootPassword}",
         require => Exec["mysql_root_password"],
         unless => "mysql -u ${mysql::params::user} -p${mysql::params::password}"
     }
 
     exec { "mysql_database":
-        command => "echo \"CREATE DATABASE ${mysql::params::database}; GRANT ALL ON ${mysql::params::database}.* TO '${mysql::params::user}'@'localhost';\" | mysql -u root -p${mysql::params::rootPassword}",
+        command => "echo \"CREATE DATABASE ${mysql::params::database}; GRANT ALL ON ${mysql::params::database}.* TO '${mysql::params::user}'@'%';\" | mysql -u root -p${mysql::params::rootPassword}",
         require => Exec["mysql_user"],
         unless => "mysql -u ${mysql::params::user} -p${mysql::params::password} ${mysql::params::database}"
     }

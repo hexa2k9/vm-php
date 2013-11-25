@@ -9,8 +9,8 @@ server {
     root /var/www/public;
 
     # define our access and error logs for this vhost
-    access_log /var/www/logs/access.log;
-    error_log /var/www/logs/error.log;
+    access_log /var/www/logs/access.app.log;
+    error_log /var/www/logs/error.app.log;
 
     # very important, php won't work without this - it sets a bunch of the server
     # values that it expects
@@ -56,6 +56,10 @@ server {
 
     # where are our site files stored?
     root /var/www/xhprof/xhprof_html;
+
+    # define our access and error logs for this vhost
+    access_log /var/www/logs/access.xhprof.log;
+    error_log /var/www/logs/error.xhprof.log;
 
     # very important, php won't work without this - it sets a bunch of the server
     # values that it expects
