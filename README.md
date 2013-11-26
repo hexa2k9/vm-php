@@ -106,7 +106,6 @@ I include the xdebug extension. This extension will send remote debugging inform
 * tidy
 * tokenizer
 * wddx
-* xdebug
 * xhprof
 * xml
 * xmlreader
@@ -115,7 +114,6 @@ I include the xdebug extension. This extension will send remote debugging inform
 * zip
 * zlib
 * Xdebug
-* Zend OPcache
 
 ### mysql 5.5.34
 
